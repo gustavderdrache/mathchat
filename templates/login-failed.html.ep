@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+  <head>
+   <title>login failed</title>
+  </head>
+  <body>
+    <p><%= $nick %> is already in use here.</p>
+    <form action="/" method="post">
+      <input type="text" name="nick">
+      <input type="submit" value="go">
+    </form>
+  </body>
+</html>
