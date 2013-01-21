@@ -1,0 +1,12 @@
+#output {
+  max-height: 30em;
+  overflow: scroll;
+}
+
+#output > p > span:after {
+  content: ' ';
+}
+
+#input {
+  width: 100%;
+}
