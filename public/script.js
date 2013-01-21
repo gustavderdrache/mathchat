@@ -1,4 +1,4 @@
-YUI().use('json', 'node', 'event', function (Y) {
+YUI().use('json', 'node', 'event' 'handlebars', function (Y) {
   var input  = Y.one('#input');
   var output = Y.one('#output');
 
@@ -30,7 +30,7 @@ YUI().use('json', 'node', 'event', function (Y) {
       Y.Node.create('<span></span>').set('text', data.time).appendTo(node);
 
       actions[data.type]();
-       
+
       node.appendTo(output);
       node.scrollIntoView();
 
