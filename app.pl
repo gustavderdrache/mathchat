@@ -3,14 +3,32 @@ use Mojolicious::Lite;
 use Mojo::IOLoop;
 use Mojo::JSON;
 
-use Scalar::Util 'refaddr';
-
 my %clients;
 
-sub broadcast ($$%) {
-    my ($id, $type, %frame) = @_;
+# super secret
+app->secret('askdjjh5taiu3kh5ai32wu5ha92745yhwreuijkht');
 
-    $frame{id}   = $id;
+# ROUTES
+get  '/' => sub { shift->render_static('index.html'); };
+post '/' => sub {
+    my $self = shift;
+
+    my $nick = $self->param('nick');
+
+    if (not(defined $nick) or exists $clients{$nick}) {
+        $self->stash(nick => $nick);
+        $self->render('login-failed');
+    } else {
+        $self->session->{nickname} = $nick;
+        $self->render_static('chat.html');
+    }
+};
+
+# CLIENT HANDLING
+sub broadcast ($$%) {
+    my ($nick, $type, %frame) = @_;
+
+    $frame{id}   = $nick;
     $frame{type} = $type;
     $frame{time} = localtime;
 
@@ -21,8 +39,7 @@ sub broadcast ($$%) {
     }
 }
 
-get '/' => sub { shift->render_static('index.html'); };
-
+# CHAT SOCKET
 websocket '/chat' => sub {
     my $self = shift;
 
@@ -30,25 +47,27 @@ websocket '/chat' => sub {
 
     my $tx = $self->tx;
 
-    my $id = sprintf '%X', refaddr $tx;
-    app->log->debug("Client connected: $id");
-    $clients{$id} = $tx;
+    die 'oh god no' unless exists $self->session->{nickname};
+    my $nick = $self->session->{nickname};
 
-    broadcast $id, 'join';
+    app->log->debug("Client connected: <$nick>");
+    $clients{$nick} = $tx;
+
+    broadcast $nick, 'join';
 
     $self->on(message => sub {
         my ($self, $msg) = @_;
 
-        broadcast $id, message => (
+        broadcast $nick, message => (
             text => $msg,
         );
     });
 
     $self->on(finish => sub {
-        app->log->debug("Client $id disconnected");
-        delete $clients{$id};
+        app->log->debug("Client <$nick> disconnected");
+        delete $clients{$nick};
 
-        broadcast $id, 'quit';
+        broadcast $nick, 'quit';
     });
 };
 
