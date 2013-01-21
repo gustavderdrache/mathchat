@@ -32,9 +32,11 @@ YUI().use('json', 'node', 'event', function (Y) {
       actions[data.type]();
        
       node.appendTo(output);
-      node.scrollIntoView();
 
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'output']);
+      MathJax.Hub.Queue(function () {
+          node.scrollIntoView();
+      });
     } else {
       Y.log("ERROR: Unknown type " + data.type);
       Y.log("Full message follows: " + e.data);
