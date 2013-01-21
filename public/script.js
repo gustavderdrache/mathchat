@@ -1,41 +1,48 @@
-YUI().use('json', 'node', 'event' 'handlebars', function (Y) {
+YUI().use('json', 'node', 'event', 'handlebars', function (Y) {
   var input  = Y.one('#input');
   var output = Y.one('#output');
 
   var ws = new WebSocket("ws://" + window.location.host + "/chat");
 
+  var msgtpl = Y.Handlebars.compile(
+      Y.one('#tpl-message').getHTML()
+    );
+
   var onmessage = function (e) {
-    var node = Y.Node.create('<p></p>');
     var data = Y.JSON.parse(e.data);
+    var params = {
+        user_id: data.id,
+        date: data.time,
+        author: data.id,
+    };
 
     var actions = {
       'join': function () {
-        var msg = '*** ' + data.id + ' has joined the room.';
-        Y.Node.create('<span></span>').set('text', msg).appendTo(node);
+          params.message = "joined the room.";
+          params.action = "join";
       },
 
       'quit': function () {
-        var msg = '*** ' + data.id + ' has left the room.';
-        Y.Node.create('<span></span>').set('text', msg).appendTo(node);
+          params.message = "left the room.";
+          params.action = "leave";
       },
 
       'message': function () {
-        Y.Node.create('<span></span>').set('text', data.id + ':').appendTo(node);
-        Y.Node.create('<span></span>').set('text', data.text).appendTo(node);
-
+          params.message = data.text;
+          params.action = "message";
       }
     };
 
     if (data.type in actions) {
-      Y.Node.create('<span></span>').set('text', data.time).appendTo(node);
-
       actions[data.type]();
 
-      node.appendTo(output);
+      var tpl = Y.Node.create(msgtpl(params));
+
+      output.append(tpl);
 
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'output']);
       MathJax.Hub.Queue(function () {
-          node.scrollIntoView();
+          tpl.scrollIntoView();
       });
     } else {
       Y.log("ERROR: Unknown type " + data.type);

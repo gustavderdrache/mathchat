@@ -6,6 +6,13 @@
     <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script src="/script.js"></script>
     <link rel="stylesheet" href="/style.css">
+    <script id="tpl-message" type="text/x-handlebars-template">
+        <div class="{{action}} {{user_id}}">
+            <span class="date">{{date}}</span>
+            <span class="author">{{author}}</span>
+            <p class="post">{{message}}</p>
+        </div>
+    </script>
   </head>
   <body>
     <div id="output"></div>
